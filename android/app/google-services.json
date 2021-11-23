@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "1021445825736",
+    "project_id": "camdoc-finder",
+    "storage_bucket": "camdoc-finder.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1021445825736:android:514a51a207a2cb557a71fd",
+        "android_client_info": {
+          "package_name": "com.micheduc25.camdoc_finder"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1021445825736-0vdh7fvgkbenghf5d75hateqapd9of1j.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.micheduc25.camdoc_finder",
+            "certificate_hash": "b15852886cf1c54069be9fc42c1a1d11309ec793"
+          }
+        },
+        {
+          "client_id": "1021445825736-qjve4f5hc9df9earfs4v74j0n83ukctm.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDx-fHKGmtxA9ParURVQ9AGcUMzfvk6weE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1021445825736-qjve4f5hc9df9earfs4v74j0n83ukctm.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
