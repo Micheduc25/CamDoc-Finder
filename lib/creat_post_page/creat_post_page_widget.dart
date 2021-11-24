@@ -73,257 +73,265 @@ class _CreatPostPageWidgetState extends State<CreatPostPageWidget> {
         elevation: 0,
       ),
       backgroundColor: Colors.white,
-      body: Column(
-        mainAxisSize: MainAxisSize.max,
-        children: [
-          Row(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Padding(
-                padding: EdgeInsetsDirectional.fromSTEB(0, 8, 0, 12),
-                child: Container(
-                  width: MediaQuery.of(context).size.width * 0.94,
-                  decoration: BoxDecoration(),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.max,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: EdgeInsetsDirectional.fromSTEB(0, 4, 0, 0),
-                        child: Container(
-                          width: MediaQuery.of(context).size.width * 0.96,
-                          height: 250,
-                          decoration: BoxDecoration(
-                            color: Colors.black,
-                            image: DecorationImage(
-                              fit: BoxFit.cover,
-                              image: Image.asset(
-                                'assets/images/emptyState@2x.png',
-                              ).image,
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                blurRadius: 6,
-                                color: Color(0x3A000000),
-                                offset: Offset(0, 2),
-                              )
-                            ],
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: Row(
-                              mainAxisSize: MainAxisSize.max,
-                              children: [
-                                for (String url in uploadedFilesUrls)
-                                  CachedNetworkImage(
-                                    imageUrl: url,
-                                    width: MediaQuery.of(context).size.width *
-                                        0.95,
-                                    height:
-                                        MediaQuery.of(context).size.height * 1,
-                                    fit: BoxFit.contain,
-                                  )
+      body: SingleChildScrollView(
+        physics: BouncingScrollPhysics(),
+        child: Column(
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            Row(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Padding(
+                  padding: EdgeInsetsDirectional.fromSTEB(0, 8, 0, 12),
+                  child: Container(
+                    width: MediaQuery.of(context).size.width * 0.94,
+                    decoration: BoxDecoration(),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.max,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: EdgeInsetsDirectional.fromSTEB(0, 4, 0, 0),
+                          child: Container(
+                            width: MediaQuery.of(context).size.width * 0.96,
+                            height: 250,
+                            decoration: BoxDecoration(
+                              color: Colors.black,
+                              image: uploadedFilesUrls.length == 0
+                                  ? DecorationImage(
+                                      fit: BoxFit.cover,
+                                      image: Image.asset(
+                                        'assets/images/emptyState@2x.png',
+                                      ).image,
+                                    )
+                                  : null,
+                              boxShadow: [
+                                BoxShadow(
+                                  blurRadius: 6,
+                                  color: Color(0x3A000000),
+                                  offset: Offset(0, 2),
+                                )
                               ],
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                mainAxisSize: MainAxisSize.max,
+                                children: [
+                                  for (String url in uploadedFilesUrls)
+                                    CachedNetworkImage(
+                                      imageUrl: url,
+                                      width: MediaQuery.of(context).size.width *
+                                          0.95,
+                                      height:
+                                          MediaQuery.of(context).size.height *
+                                              1,
+                                      fit: BoxFit.contain,
+                                    )
+                                ],
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      Padding(
-                        padding: EdgeInsetsDirectional.fromSTEB(0, 10, 0, 15),
-                        child: FFButtonWidget(
-                          onPressed: () async {
-                            setState(() => _loadingButton1 = true);
-                            try {
-                              final selectedMedia =
-                                  await selectMediaWithSourceBottomSheet(
-                                context: context,
-                                allowPhoto: true,
-                              );
-                              if (selectedMedia != null &&
-                                  validateFileFormat(
-                                      selectedMedia.storagePath, context)) {
-                                showUploadMessage(context, 'Uploading file...',
-                                    showLoading: true);
-                                final downloadUrl = await uploadData(
-                                    selectedMedia.storagePath,
-                                    selectedMedia.bytes);
-                                ScaffoldMessenger.of(context)
-                                    .hideCurrentSnackBar();
-                                if (downloadUrl != null) {
-                                  setState(
-                                      () => uploadedFilesUrls.add(downloadUrl));
+                        Padding(
+                          padding: EdgeInsetsDirectional.fromSTEB(0, 10, 0, 15),
+                          child: FFButtonWidget(
+                            onPressed: () async {
+                              setState(() => _loadingButton1 = true);
+                              try {
+                                final selectedMedia =
+                                    await selectMediaWithSourceBottomSheet(
+                                  context: context,
+                                  allowPhoto: true,
+                                );
+                                if (selectedMedia != null &&
+                                    validateFileFormat(
+                                        selectedMedia.storagePath, context)) {
                                   showUploadMessage(
-                                      context, 'File Successfully uploaded!');
-                                } else {
-                                  showUploadMessage(
-                                      context, 'Failed to upload media');
-                                  return;
+                                      context, 'Uploading file...',
+                                      showLoading: true);
+                                  final downloadUrl = await uploadData(
+                                      selectedMedia.storagePath,
+                                      selectedMedia.bytes);
+                                  ScaffoldMessenger.of(context)
+                                      .hideCurrentSnackBar();
+                                  if (downloadUrl != null) {
+                                    setState(() =>
+                                        uploadedFilesUrls.add(downloadUrl));
+                                    showUploadMessage(
+                                        context, 'File Successfully uploaded!');
+                                  } else {
+                                    showUploadMessage(
+                                        context, 'Failed to upload media');
+                                    return;
+                                  }
                                 }
+                              } finally {
+                                setState(() => _loadingButton1 = false);
                               }
-                            } finally {
-                              setState(() => _loadingButton1 = false);
-                            }
-                          },
-                          text: 'Add image',
-                          options: FFButtonOptions(
-                            width: 130,
-                            height: 40,
-                            color: FlutterFlowTheme.primaryColor,
-                            textStyle: FlutterFlowTheme.subtitle2.override(
-                              fontFamily: 'Quicksand',
-                              color: Colors.white,
-                              fontSize: 14,
+                            },
+                            text: 'Add image',
+                            options: FFButtonOptions(
+                              width: 130,
+                              height: 40,
+                              color: FlutterFlowTheme.primaryColor,
+                              textStyle: FlutterFlowTheme.subtitle2.override(
+                                fontFamily: 'Quicksand',
+                                color: Colors.white,
+                                fontSize: 14,
+                              ),
+                              borderSide: BorderSide(
+                                color: Colors.transparent,
+                                width: 1,
+                              ),
+                              borderRadius: 12,
                             ),
-                            borderSide: BorderSide(
-                              color: Colors.transparent,
-                              width: 1,
-                            ),
-                            borderRadius: 12,
+                            loading: _loadingButton1,
                           ),
-                          loading: _loadingButton1,
                         ),
-                      ),
-                      Padding(
-                        padding: EdgeInsetsDirectional.fromSTEB(0, 10, 0, 0),
-                        child: TextFormField(
-                          controller: textController1,
-                          obscureText: false,
-                          decoration: InputDecoration(
-                            hintText: 'Title...',
-                            hintStyle: FlutterFlowTheme.bodyText1.override(
+                        Padding(
+                          padding: EdgeInsetsDirectional.fromSTEB(0, 10, 0, 0),
+                          child: TextFormField(
+                            controller: textController1,
+                            obscureText: false,
+                            decoration: InputDecoration(
+                              hintText: 'Title...',
+                              hintStyle: FlutterFlowTheme.bodyText1.override(
+                                fontFamily: 'Lato',
+                                color: Colors.black,
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: FlutterFlowTheme.primaryColor,
+                                  width: 2,
+                                ),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: FlutterFlowTheme.primaryColor,
+                                  width: 2,
+                                ),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              contentPadding:
+                                  EdgeInsetsDirectional.fromSTEB(10, 3, 10, 3),
+                            ),
+                            style: FlutterFlowTheme.bodyText1.override(
                               fontFamily: 'Lato',
                               color: Colors.black,
                             ),
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                color: FlutterFlowTheme.primaryColor,
-                                width: 2,
-                              ),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                color: FlutterFlowTheme.primaryColor,
-                                width: 2,
-                              ),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            contentPadding:
-                                EdgeInsetsDirectional.fromSTEB(10, 3, 10, 3),
+                            textAlign: TextAlign.start,
                           ),
-                          style: FlutterFlowTheme.bodyText1.override(
-                            fontFamily: 'Lato',
-                            color: Colors.black,
-                          ),
-                          textAlign: TextAlign.start,
                         ),
-                      ),
-                      Padding(
-                        padding: EdgeInsetsDirectional.fromSTEB(0, 12, 0, 0),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.max,
-                          children: [
-                            Expanded(
-                              child: TextFormField(
-                                controller: textController2,
-                                obscureText: false,
-                                decoration: InputDecoration(
-                                  hintText: 'Description....',
-                                  hintStyle:
-                                      FlutterFlowTheme.bodyText2.override(
+                        Padding(
+                          padding: EdgeInsetsDirectional.fromSTEB(0, 12, 0, 0),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.max,
+                            children: [
+                              Expanded(
+                                child: TextFormField(
+                                  controller: textController2,
+                                  obscureText: false,
+                                  decoration: InputDecoration(
+                                    hintText: 'Description....',
+                                    hintStyle:
+                                        FlutterFlowTheme.bodyText2.override(
+                                      fontFamily: 'Lexend Deca',
+                                      color: Color(0xFF8B97A2),
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.normal,
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: FlutterFlowTheme.primaryColor,
+                                        width: 2,
+                                      ),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: FlutterFlowTheme.primaryColor,
+                                        width: 2,
+                                      ),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    contentPadding:
+                                        EdgeInsetsDirectional.fromSTEB(
+                                            20, 32, 20, 12),
+                                  ),
+                                  style: FlutterFlowTheme.bodyText1.override(
                                     fontFamily: 'Lexend Deca',
-                                    color: Color(0xFF8B97A2),
+                                    color: Color(0xFF090F13),
                                     fontSize: 14,
                                     fontWeight: FontWeight.normal,
                                   ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                      color: FlutterFlowTheme.primaryColor,
-                                      width: 2,
-                                    ),
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                      color: FlutterFlowTheme.primaryColor,
-                                      width: 2,
-                                    ),
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  contentPadding:
-                                      EdgeInsetsDirectional.fromSTEB(
-                                          20, 32, 20, 12),
+                                  textAlign: TextAlign.start,
+                                  maxLines: 4,
                                 ),
-                                style: FlutterFlowTheme.bodyText1.override(
-                                  fontFamily: 'Lexend Deca',
-                                  color: Color(0xFF090F13),
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.normal,
-                                ),
-                                textAlign: TextAlign.start,
-                                maxLines: 4,
-                              ),
-                            )
-                          ],
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-              )
-            ],
-          ),
-          Padding(
-            padding: EdgeInsetsDirectional.fromSTEB(0, 16, 0, 0),
-            child: FFButtonWidget(
-              onPressed: () async {
-                setState(() => _loadingButton2 = true);
-                try {
-                  final lostDocumentsCreateData = {
-                    ...createLostDocumentsRecordData(
-                      title: textController1.text,
-                      description: textController2.text,
-                      author: currentUserReference,
+                              )
+                            ],
+                          ),
+                        )
+                      ],
                     ),
-                    'images': FieldValue.arrayUnion(uploadedFilesUrls),
-                  };
-                  final lostDocumentsRecordReference =
-                      LostDocumentsRecord.collection.doc();
-                  await lostDocumentsRecordReference
-                      .set(lostDocumentsCreateData);
-                  newPost = LostDocumentsRecord.getDocumentFromData(
-                      lostDocumentsCreateData, lostDocumentsRecordReference);
-                  Navigator.pop(context);
-
-                  setState(() {});
-                } finally {
-                  setState(() => _loadingButton2 = false);
-                }
-              },
-              text: 'Create Post',
-              options: FFButtonOptions(
-                width: 270,
-                height: 60,
-                color: FlutterFlowTheme.primaryColor,
-                textStyle: FlutterFlowTheme.subtitle2.override(
-                  fontFamily: 'Lexend Deca',
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                ),
-                elevation: 3,
-                borderSide: BorderSide(
-                  color: Colors.transparent,
-                  width: 1,
-                ),
-                borderRadius: 8,
-              ),
-              loading: _loadingButton2,
+                  ),
+                )
+              ],
             ),
-          )
-        ],
+            Padding(
+              padding: EdgeInsetsDirectional.fromSTEB(0, 16, 0, 0),
+              child: FFButtonWidget(
+                onPressed: () async {
+                  setState(() => _loadingButton2 = true);
+                  try {
+                    final lostDocumentsCreateData = {
+                      ...createLostDocumentsRecordData(
+                          title: textController1.text,
+                          description: textController2.text,
+                          author: currentUserReference,
+                          dateAdded: DateTime.now(),
+                          views: 0),
+                      'images': FieldValue.arrayUnion(uploadedFilesUrls),
+                    };
+                    final lostDocumentsRecordReference =
+                        LostDocumentsRecord.collection.doc();
+                    await lostDocumentsRecordReference
+                        .set(lostDocumentsCreateData);
+                    // newPost = LostDocumentsRecord.getDocumentFromData(
+                    //     lostDocumentsCreateData, lostDocumentsRecordReference);
+                    Navigator.pop(context);
+
+                    setState(() {});
+                  } finally {
+                    setState(() => _loadingButton2 = false);
+                  }
+                },
+                text: 'Create Post',
+                options: FFButtonOptions(
+                  width: 270,
+                  height: 60,
+                  color: FlutterFlowTheme.primaryColor,
+                  textStyle: FlutterFlowTheme.subtitle2.override(
+                    fontFamily: 'Lexend Deca',
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  elevation: 3,
+                  borderSide: BorderSide(
+                    color: Colors.transparent,
+                    width: 1,
+                  ),
+                  borderRadius: 8,
+                ),
+                loading: _loadingButton2,
+              ),
+            )
+          ],
+        ),
       ),
     );
   }

@@ -54,6 +54,7 @@ class _MyAppState extends State<MyApp> {
       ],
       supportedLocales: const [Locale('en', ''), Locale('fr', '')],
       theme: ThemeData(primarySwatch: Colors.blue),
+      debugShowCheckedModeBanner: false,
       home: initialUser == null
           ? Container(
               color: Colors.transparent,
@@ -100,49 +101,48 @@ class _NavBarPageState extends State<NavBarPage> {
     return Scaffold(
       body: tabs[_currentPage],
       bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(
-              Icons.home_outlined,
-              size: 24,
+          items: const <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: Icon(
+                Icons.home_outlined,
+                size: 24,
+              ),
+              activeIcon: Icon(
+                Icons.home,
+                size: 24,
+              ),
+              label: 'Home',
+              tooltip: 'Home',
             ),
-            activeIcon: Icon(
-              Icons.home,
-              size: 24,
+            BottomNavigationBarItem(
+              icon: Icon(
+                Icons.person,
+                size: 24,
+              ),
+              label: 'Profile',
+              tooltip: 'Profile',
             ),
-            label: 'Home',
-            tooltip: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(
-              Icons.person,
-              size: 24,
-            ),
-            label: 'Profile',
-            tooltip: 'Profile',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(
-              Icons.chat_bubble_outline_sharp,
-              size: 24,
-            ),
-            activeIcon: Icon(
-              Icons.chat_bubble,
-              size: 24,
-            ),
-            label: 'Messages',
-            tooltip: 'Messages',
-          )
-        ],
-        backgroundColor: Colors.black,
-        currentIndex: tabs.keys.toList().indexOf(_currentPage),
-        selectedItemColor: Colors.white,
-        unselectedItemColor: Color(0xB9FFFFFF),
-        onTap: (i) => setState(() => _currentPage = tabs.keys.toList()[i]),
-        showSelectedLabels: false,
-        showUnselectedLabels: false,
-        type: BottomNavigationBarType.shifting,
-      ),
+            BottomNavigationBarItem(
+              icon: Icon(
+                Icons.chat_bubble_outline_sharp,
+                size: 24,
+              ),
+              activeIcon: Icon(
+                Icons.chat_bubble,
+                size: 24,
+              ),
+              label: 'Messages',
+              tooltip: 'Messages',
+            )
+          ],
+          backgroundColor: FlutterFlowTheme.secondaryColor,
+          currentIndex: tabs.keys.toList().indexOf(_currentPage),
+          selectedItemColor: Colors.white,
+          unselectedItemColor: Color(0xB9FFFFFF),
+          onTap: (i) => setState(() => _currentPage = tabs.keys.toList()[i]),
+          showSelectedLabels: false,
+          showUnselectedLabels: false,
+          type: BottomNavigationBarType.shifting),
     );
   }
 }
