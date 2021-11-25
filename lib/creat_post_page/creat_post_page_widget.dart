@@ -1,3 +1,6 @@
+import 'package:cam_doc_finder/image_viewer/image_viewer_widget.dart';
+import 'package:flutter_swiper/flutter_swiper.dart';
+
 import '../auth/auth_util.dart';
 import '../backend/backend.dart';
 import '../backend/firebase_storage/storage.dart';
@@ -115,22 +118,72 @@ class _CreatPostPageWidgetState extends State<CreatPostPageWidget> {
                               ],
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              child: Row(
-                                mainAxisSize: MainAxisSize.max,
-                                children: [
-                                  for (String url in uploadedFilesUrls)
-                                    CachedNetworkImage(
-                                      imageUrl: url,
-                                      width: MediaQuery.of(context).size.width *
-                                          0.95,
-                                      height:
-                                          MediaQuery.of(context).size.height *
-                                              1,
-                                      fit: BoxFit.contain,
-                                    )
-                                ],
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(maxHeight: 250),
+                              child: Padding(
+                                padding:
+                                    EdgeInsetsDirectional.fromSTEB(0, 0, 0, 5),
+                                child: Builder(builder: (context) {
+                                  return Swiper(
+                                    itemBuilder:
+                                        (BuildContext context, int index) {
+                                      return Hero(
+                                        tag: "newlostdoc$index",
+                                        child: Image.network(
+                                          uploadedFilesUrls[index],
+                                          width:
+                                              MediaQuery.of(context).size.width,
+                                          height: 250,
+                                          fit: BoxFit.cover,
+                                          loadingBuilder: (BuildContext context,
+                                              Widget child,
+                                              ImageChunkEvent loadingProgress) {
+                                            if (loadingProgress == null) {
+                                              return child;
+                                            }
+                                            return Center(
+                                              child: CircularProgressIndicator(
+                                                value: loadingProgress
+                                                            .expectedTotalBytes !=
+                                                        null
+                                                    ? loadingProgress
+                                                            .cumulativeBytesLoaded /
+                                                        loadingProgress
+                                                            .expectedTotalBytes
+                                                    : null,
+                                              ),
+                                            );
+                                          },
+                                          errorBuilder: (ctx, o, s) {
+                                            return Image.asset(
+                                              'assets/images/emptyState@2x.png',
+                                              width: double.infinity,
+                                            );
+                                          },
+                                        ),
+                                      );
+                                    },
+                                    itemHeight: 250,
+                                    loop: false,
+                                    itemCount: uploadedFilesUrls.length,
+                                    pagination: uploadedFilesUrls.length > 1
+                                        ? new SwiperPagination()
+                                        : null,
+                                    control: uploadedFilesUrls.length > 1
+                                        ? new SwiperControl()
+                                        : null,
+                                    onTap: (index) {
+                                      Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  ImageViewWidget(
+                                                    imageUrl: uploadedFilesUrls[
+                                                        index],
+                                                    heroTag: 'newlostdoc$index',
+                                                  )));
+                                    },
+                                  );
+                                }),
                               ),
                             ),
                           ),

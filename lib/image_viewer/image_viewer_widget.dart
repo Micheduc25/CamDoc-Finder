@@ -2,10 +2,12 @@ import 'package:cam_doc_finder/flutter_flow/flutter_flow_theme.dart';
 import 'package:flutter/material.dart';
 
 class ImageViewWidget extends StatelessWidget {
-  const ImageViewWidget({key, this.imageUrl, this.isNetworkImage = true})
+  const ImageViewWidget(
+      {key, this.imageUrl, this.isNetworkImage = true, @required this.heroTag})
       : super(key: key);
   final String imageUrl;
   final bool isNetworkImage;
+  final String heroTag;
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +22,7 @@ class ImageViewWidget extends StatelessWidget {
               InteractiveViewer(
                 child: isNetworkImage
                     ? Hero(
-                        tag: 'imagetoview',
+                        tag: heroTag,
                         child: Image.network(
                           imageUrl,
                           errorBuilder: (ctx, o, s) =>
@@ -28,7 +30,7 @@ class ImageViewWidget extends StatelessWidget {
                           fit: BoxFit.contain,
                         ))
                     : Hero(
-                        tag: 'imagetoview',
+                        tag: heroTag,
                         child: Image.asset(
                           imageUrl,
                           errorBuilder: (ctx, o, s) =>

@@ -37,11 +37,228 @@ class _LoginPageWidgetState extends State<LoginPageWidget> {
       key: scaffoldKey,
       backgroundColor: Colors.black,
       body: SafeArea(
-        child: Stack(
-          children: [
-            Align(
-              alignment: AlignmentDirectional(0, 0.4),
-              child: FFButtonWidget(
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.max,
+            children: [
+              Container(
+                width: 100,
+                height: MediaQuery.of(context).size.height * 0.08,
+                decoration: BoxDecoration(
+                  color: Colors.transparent,
+                ),
+              ),
+              Text(
+                'CamDoc Finder',
+                style: FlutterFlowTheme.title1.override(
+                  fontFamily: 'Condiment',
+                  color: Colors.white,
+                  fontSize: 56,
+                ),
+              ),
+              Padding(
+                padding: EdgeInsetsDirectional.fromSTEB(15, 12, 15, 0),
+                child: Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: Color(0x22EEEEEE),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Padding(
+                    padding: EdgeInsetsDirectional.fromSTEB(15, 5, 15, 0),
+                    child: TextFormField(
+                      controller: emailFieldController,
+                      obscureText: false,
+                      decoration: InputDecoration(
+                        labelText: 'Email',
+                        labelStyle: FlutterFlowTheme.bodyText1,
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: Color(0x00000000),
+                            width: 10,
+                          ),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: Color(0x00000000),
+                            width: 10,
+                          ),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      style: FlutterFlowTheme.bodyText1,
+                      textAlign: TextAlign.start,
+                    ),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: EdgeInsetsDirectional.fromSTEB(15, 20, 15, 0),
+                child: Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: Color(0x22EEEEEE),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Padding(
+                    padding: EdgeInsetsDirectional.fromSTEB(15, 0, 15, 0),
+                    child: TextFormField(
+                      controller: passwordFieldController,
+                      obscureText: !passwordFieldVisibility,
+                      decoration: InputDecoration(
+                        labelText: 'Password',
+                        labelStyle: FlutterFlowTheme.bodyText1,
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: Color(0x00000000),
+                            width: 10,
+                          ),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: Color(0x00000000),
+                            width: 10,
+                          ),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        suffixIcon: InkWell(
+                          onTap: () => setState(
+                            () => passwordFieldVisibility =
+                                !passwordFieldVisibility,
+                          ),
+                          child: Icon(
+                            passwordFieldVisibility
+                                ? Icons.visibility_outlined
+                                : Icons.visibility_off_outlined,
+                            size: 22,
+                          ),
+                        ),
+                      ),
+                      style: FlutterFlowTheme.bodyText1,
+                      textAlign: TextAlign.start,
+                    ),
+                  ),
+                ),
+              ),
+              Align(
+                alignment: AlignmentDirectional(1, 0),
+                child: Padding(
+                  padding: EdgeInsetsDirectional.fromSTEB(0, 25, 15, 0),
+                  child: InkWell(
+                    onTap: () async {
+                      if (emailFieldController.text.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'Email required!',
+                            ),
+                          ),
+                        );
+                        return;
+                      }
+                      await resetPassword(
+                        email: emailFieldController.text,
+                        context: context,
+                      );
+                    },
+                    child: Text(
+                      'Forgot password?',
+                      style: FlutterFlowTheme.bodyText1.override(
+                        fontFamily: 'Lato',
+                        color: FlutterFlowTheme.primaryColor,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: EdgeInsetsDirectional.fromSTEB(15, 30, 15, 0),
+                child: FFButtonWidget(
+                  onPressed: () async {
+                    setState(() => _loadingButton2 = true);
+                    try {
+                      final user = await signInWithEmail(
+                        context,
+                        emailFieldController.text,
+                        passwordFieldController.text,
+                      );
+                      if (user == null) {
+                        return;
+                      }
+
+                      await Navigator.pushAndRemoveUntil(
+                        context,
+                        PageTransition(
+                          type: PageTransitionType.fade,
+                          duration: Duration(milliseconds: 300),
+                          reverseDuration: Duration(milliseconds: 300),
+                          child: NavBarPage(initialPage: 'DocumentsPage'),
+                        ),
+                        (r) => false,
+                      );
+                    } finally {
+                      setState(() => _loadingButton2 = false);
+                    }
+                  },
+                  text: 'Log In',
+                  options: FFButtonOptions(
+                    width: double.infinity,
+                    height: 40,
+                    color: Color(0xFF1062AE),
+                    textStyle: FlutterFlowTheme.subtitle1.override(
+                      fontFamily: 'Poppins',
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    borderSide: BorderSide(
+                      color: Colors.transparent,
+                      width: 2,
+                    ),
+                    borderRadius: 6,
+                  ),
+                  loading: _loadingButton2,
+                ),
+              ),
+              Padding(
+                padding: EdgeInsetsDirectional.fromSTEB(0, 30, 0, 30),
+                child: Row(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Container(
+                      width: MediaQuery.of(context).size.width * 0.4,
+                      height: 1,
+                      decoration: BoxDecoration(
+                        color: Color(0x19EEEEEE),
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsetsDirectional.fromSTEB(0, 3, 0, 0),
+                      child: Text(
+                        'OR',
+                        style: FlutterFlowTheme.bodyText1.override(
+                          fontFamily: 'Lato',
+                          color: Color(0xA5FFFFFF),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    Container(
+                      width: MediaQuery.of(context).size.width * 0.4,
+                      height: 1,
+                      decoration: BoxDecoration(
+                        color: Color(0x19EEEEEE),
+                      ),
+                    )
+                  ],
+                ),
+              ),
+              FFButtonWidget(
                 onPressed: () async {
                   setState(() => _loadingButton1 = true);
                   try {
@@ -83,244 +300,7 @@ class _LoginPageWidgetState extends State<LoginPageWidget> {
                 ),
                 loading: _loadingButton1,
               ),
-            ),
-            SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.max,
-                children: [
-                  Container(
-                    width: 100,
-                    height: MediaQuery.of(context).size.height * 0.08,
-                    decoration: BoxDecoration(
-                      color: Colors.transparent,
-                    ),
-                  ),
-                  Text(
-                    'CamDoc Finder',
-                    style: FlutterFlowTheme.title1.override(
-                      fontFamily: 'Condiment',
-                      color: Colors.white,
-                      fontSize: 56,
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsetsDirectional.fromSTEB(15, 12, 15, 0),
-                    child: Container(
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        color: Color(0x22EEEEEE),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Padding(
-                        padding: EdgeInsetsDirectional.fromSTEB(15, 5, 15, 0),
-                        child: TextFormField(
-                          controller: emailFieldController,
-                          obscureText: false,
-                          decoration: InputDecoration(
-                            labelText: 'Phone number or email',
-                            labelStyle: FlutterFlowTheme.bodyText1,
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                color: Color(0x00000000),
-                                width: 10,
-                              ),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                color: Color(0x00000000),
-                                width: 10,
-                              ),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          style: FlutterFlowTheme.bodyText1,
-                          textAlign: TextAlign.start,
-                        ),
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsetsDirectional.fromSTEB(15, 20, 15, 0),
-                    child: Container(
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        color: Color(0x22EEEEEE),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Padding(
-                        padding: EdgeInsetsDirectional.fromSTEB(15, 0, 15, 0),
-                        child: TextFormField(
-                          controller: passwordFieldController,
-                          obscureText: !passwordFieldVisibility,
-                          decoration: InputDecoration(
-                            labelText: 'Password',
-                            labelStyle: FlutterFlowTheme.bodyText1,
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                color: Color(0x00000000),
-                                width: 10,
-                              ),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                color: Color(0x00000000),
-                                width: 10,
-                              ),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            suffixIcon: InkWell(
-                              onTap: () => setState(
-                                () => passwordFieldVisibility =
-                                    !passwordFieldVisibility,
-                              ),
-                              child: Icon(
-                                passwordFieldVisibility
-                                    ? Icons.visibility_outlined
-                                    : Icons.visibility_off_outlined,
-                                size: 22,
-                              ),
-                            ),
-                          ),
-                          style: FlutterFlowTheme.bodyText1,
-                          textAlign: TextAlign.start,
-                        ),
-                      ),
-                    ),
-                  ),
-                  Align(
-                    alignment: AlignmentDirectional(1, 0),
-                    child: Padding(
-                      padding: EdgeInsetsDirectional.fromSTEB(0, 25, 15, 0),
-                      child: InkWell(
-                        onTap: () async {
-                          if (emailFieldController.text.isEmpty) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  'Email required!',
-                                ),
-                              ),
-                            );
-                            return;
-                          }
-                          await resetPassword(
-                            email: emailFieldController.text,
-                            context: context,
-                          );
-                        },
-                        child: Text(
-                          'Forgot password?',
-                          style: FlutterFlowTheme.bodyText1.override(
-                            fontFamily: 'Lato',
-                            color: FlutterFlowTheme.primaryColor,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsetsDirectional.fromSTEB(15, 30, 15, 0),
-                    child: FFButtonWidget(
-                      onPressed: () async {
-                        setState(() => _loadingButton2 = true);
-                        try {
-                          final user = await signInWithEmail(
-                            context,
-                            emailFieldController.text,
-                            passwordFieldController.text,
-                          );
-                          if (user == null) {
-                            return;
-                          }
-
-                          await Navigator.pushAndRemoveUntil(
-                            context,
-                            PageTransition(
-                              type: PageTransitionType.fade,
-                              duration: Duration(milliseconds: 300),
-                              reverseDuration: Duration(milliseconds: 300),
-                              child: NavBarPage(initialPage: 'DocumentsPage'),
-                            ),
-                            (r) => false,
-                          );
-                        } finally {
-                          setState(() => _loadingButton2 = false);
-                        }
-                      },
-                      text: 'Log In',
-                      options: FFButtonOptions(
-                        width: double.infinity,
-                        height: 40,
-                        color: Color(0xFF1062AE),
-                        textStyle: FlutterFlowTheme.subtitle1.override(
-                          fontFamily: 'Poppins',
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                        ),
-                        borderSide: BorderSide(
-                          color: Colors.transparent,
-                          width: 2,
-                        ),
-                        borderRadius: 6,
-                      ),
-                      loading: _loadingButton2,
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsetsDirectional.fromSTEB(0, 35, 0, 0),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        Container(
-                          width: MediaQuery.of(context).size.width * 0.4,
-                          height: 1,
-                          decoration: BoxDecoration(
-                            color: Color(0x19EEEEEE),
-                          ),
-                        ),
-                        Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(0, 3, 0, 0),
-                          child: Text(
-                            'OR',
-                            style: FlutterFlowTheme.bodyText1.override(
-                              fontFamily: 'Lato',
-                              color: Color(0xA5FFFFFF),
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        Container(
-                          width: MediaQuery.of(context).size.width * 0.4,
-                          height: 1,
-                          decoration: BoxDecoration(
-                            color: Color(0x19EEEEEE),
-                          ),
-                        )
-                      ],
-                    ),
-                  )
-                ],
-              ),
-            ),
-            Align(
-              alignment: AlignmentDirectional(-0.03, 0.85),
-              child: Container(
-                width: double.infinity,
-                height: 0.5,
-                decoration: BoxDecoration(
-                  color: Color(0x45EEEEEE),
-                ),
-              ),
-            ),
-            Align(
-              alignment: AlignmentDirectional(0, 1),
-              child: Container(
+              Container(
                 width: double.infinity,
                 height: 30,
                 decoration: BoxDecoration(
@@ -373,8 +353,8 @@ class _LoginPageWidgetState extends State<LoginPageWidget> {
                   ),
                 ),
               ),
-            )
-          ],
+            ],
+          ),
         ),
       ),
     );

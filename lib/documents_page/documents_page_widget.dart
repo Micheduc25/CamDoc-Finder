@@ -20,6 +20,9 @@ class DocumentsPageWidget extends StatefulWidget {
 class _DocumentsPageWidgetState extends State<DocumentsPageWidget> {
   final scaffoldKey = GlobalKey<ScaffoldState>();
   SearchBar searchBar;
+  List<LostDocumentsRecord> filteredLostDocs;
+  List<LostDocumentsRecord> documentsPageLostDocumentsRecordList;
+  bool isSearching = false;
 
   AppBar buildAppBar(BuildContext context) {
     return new AppBar(
@@ -74,10 +77,20 @@ class _DocumentsPageWidgetState extends State<DocumentsPageWidget> {
         ]);
   }
 
-  void onSubmitted(String value) {
-    setState(() {
-      print('value searched for is $value');
-    });
+  void searchDocs(String value) {
+    if (isSearching == false) isSearching = true;
+    // print(isSearching);
+
+    if (documentsPageLostDocumentsRecordList != null)
+      setState(() {
+        if (value.isNotEmpty)
+          filteredLostDocs = filteredLostDocs.where((doc) {
+            return (doc.title.toLowerCase().contains(value.toLowerCase())) ||
+                (doc.description.toLowerCase().contains(value.toLowerCase()));
+          }).toList();
+        else
+          filteredLostDocs = documentsPageLostDocumentsRecordList;
+      });
   }
 
   _DocumentsPageWidgetState() {
@@ -85,12 +98,18 @@ class _DocumentsPageWidgetState extends State<DocumentsPageWidget> {
         inBar: false,
         buildDefaultAppBar: buildAppBar,
         setState: setState,
-        onSubmitted: onSubmitted,
+        // onSubmitted: searchDocs,
+        onChanged: searchDocs,
         onCleared: () {
-          print("cleared");
+          if (documentsPageLostDocumentsRecordList != null)
+            setState(() {
+              filteredLostDocs = documentsPageLostDocumentsRecordList;
+            });
         },
         onClosed: () {
-          print("closed");
+          setState(() {
+            isSearching = false;
+          });
         });
   }
 
@@ -118,8 +137,8 @@ class _DocumentsPageWidgetState extends State<DocumentsPageWidget> {
               ),
             );
           }
-          List<LostDocumentsRecord> documentsPageLostDocumentsRecordList =
-              snapshot.data;
+          documentsPageLostDocumentsRecordList = snapshot.data;
+          if (filteredLostDocs == null) filteredLostDocs = snapshot.data;
           print(documentsPageLostDocumentsRecordList.length);
           return Scaffold(
             key: scaffoldKey,
@@ -130,6 +149,8 @@ class _DocumentsPageWidgetState extends State<DocumentsPageWidget> {
                 padding: EdgeInsetsDirectional.fromSTEB(1, 0, 1, 0),
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     // Padding(
                     //   padding: EdgeInsetsDirectional.fromSTEB(0, 0, 0, 20),
@@ -245,42 +266,58 @@ class _DocumentsPageWidgetState extends State<DocumentsPageWidget> {
                     Expanded(
                       child: Builder(
                         builder: (context) {
-                          final lostDocumentsList =
-                              documentsPageLostDocumentsRecordList?.toList() ??
-                                  [];
-                          return ListView.builder(
-                            padding: EdgeInsets.zero,
-                            shrinkWrap: true,
-                            scrollDirection: Axis.vertical,
-                            itemCount: lostDocumentsList.length,
-                            itemBuilder: (context, lostDocumentsListIndex) {
-                              final lostDocumentsListItem =
-                                  lostDocumentsList[lostDocumentsListIndex];
-                              return StreamBuilder<UsersRecord>(
-                                stream: UsersRecord.getDocument(
-                                    lostDocumentsListItem.author),
-                                builder: (context, snapshot) {
-                                  // Customize what your widget looks like when it's loading.
-                                  if (!snapshot.hasData) {
-                                    return Center(
-                                      child: SizedBox(
-                                        width: 50,
-                                        height: 50,
-                                        child: CircularProgressIndicator(
-                                          color: FlutterFlowTheme.primaryColor,
-                                        ),
-                                      ),
+                          // final lostDocumentsList =
+                          //     documentsPageLostDocumentsRecordList?.toList() ??
+                          //         [];
+                          return filteredLostDocs.length == 0
+                              ? Align(
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                      isSearching
+                                          ? 'No match found'
+                                          : "No document available for now",
+                                      textAlign: TextAlign.center,
+                                      style: FlutterFlowTheme.title2),
+                                )
+                              : ListView.builder(
+                                  padding: EdgeInsets.zero,
+                                  shrinkWrap: true,
+                                  scrollDirection: Axis.vertical,
+                                  physics: BouncingScrollPhysics(),
+                                  itemCount: filteredLostDocs.length,
+                                  itemBuilder:
+                                      (context, lostDocumentsListIndex) {
+                                    final lostDocumentsListItem =
+                                        filteredLostDocs[
+                                            lostDocumentsListIndex];
+                                    return StreamBuilder<UsersRecord>(
+                                      stream: UsersRecord.getDocument(
+                                          lostDocumentsListItem.author),
+                                      builder: (context, snapshot) {
+                                        // Customize what your widget looks like when it's loading.
+                                        if (!snapshot.hasData) {
+                                          return Center(
+                                            child: SizedBox(
+                                              width: 50,
+                                              height: 50,
+                                              child: CircularProgressIndicator(
+                                                color: FlutterFlowTheme
+                                                    .primaryColor,
+                                              ),
+                                            ),
+                                          );
+                                        }
+                                        final postItemUsersRecord =
+                                            snapshot.data;
+                                        return PostItemWidget(
+                                          author: postItemUsersRecord,
+                                          lost: lostDocumentsListItem,
+                                          docIndex: lostDocumentsListIndex,
+                                        );
+                                      },
                                     );
-                                  }
-                                  final postItemUsersRecord = snapshot.data;
-                                  return PostItemWidget(
-                                    author: postItemUsersRecord,
-                                    lost: lostDocumentsListItem,
-                                  );
-                                },
-                              );
-                            },
-                          );
+                                  },
+                                );
                         },
                       ),
                     )

@@ -1,3 +1,7 @@
+import 'package:cam_doc_finder/auth/auth_util.dart';
+import 'package:cam_doc_finder/auth/firebase_user_provider.dart';
+import 'package:cam_doc_finder/image_viewer/image_viewer_widget.dart';
+
 import '../backend/backend.dart';
 import '../contact_page/contact_page_widget.dart';
 import '../flutter_flow/flutter_flow_theme.dart';
@@ -8,14 +12,12 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
 
 class PostItemWidget extends StatefulWidget {
-  PostItemWidget({
-    Key key,
-    this.author,
-    this.lost,
-  }) : super(key: key);
+  PostItemWidget({Key key, this.author, this.lost, @required this.docIndex})
+      : super(key: key);
 
   final UsersRecord author;
   final LostDocumentsRecord lost;
+  final int docIndex;
 
   @override
   _PostItemWidgetState createState() => _PostItemWidgetState();
@@ -86,45 +88,46 @@ class _PostItemWidgetState extends State<PostItemWidget> {
                     )
                   ],
                 ),
-                FFButtonWidget(
-                  onPressed: () async {
-                    setState(() => _loadingButton = true);
-                    try {
-                      await Navigator.push(
-                        context,
-                        PageTransition(
-                          type: PageTransitionType.fade,
-                          duration: Duration(milliseconds: 300),
-                          reverseDuration: Duration(milliseconds: 300),
-                          child: ContactPageWidget(
-                            lost: widget.lost,
-                            author: widget.author,
+                if (currentUserUid != widget.author.uid)
+                  FFButtonWidget(
+                    onPressed: () async {
+                      setState(() => _loadingButton = true);
+                      try {
+                        await Navigator.push(
+                          context,
+                          PageTransition(
+                            type: PageTransitionType.fade,
+                            duration: Duration(milliseconds: 300),
+                            reverseDuration: Duration(milliseconds: 300),
+                            child: ContactPageWidget(
+                              lost: widget.lost,
+                              author: widget.author,
+                            ),
                           ),
-                        ),
-                      );
-                    } finally {
-                      setState(() => _loadingButton = false);
-                    }
-                  },
-                  text: 'Contact',
-                  options: FFButtonOptions(
-                    width: 100,
-                    height: 35,
-                    color: FlutterFlowTheme.primaryColor,
-                    textStyle: FlutterFlowTheme.subtitle2.override(
-                      fontFamily: 'Quicksand',
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
+                        );
+                      } finally {
+                        setState(() => _loadingButton = false);
+                      }
+                    },
+                    text: 'Contact',
+                    options: FFButtonOptions(
+                      width: 100,
+                      height: 35,
+                      color: FlutterFlowTheme.primaryColor,
+                      textStyle: FlutterFlowTheme.subtitle2.override(
+                        fontFamily: 'Quicksand',
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      borderSide: BorderSide(
+                        color: Colors.transparent,
+                        width: 1,
+                      ),
+                      borderRadius: 6,
                     ),
-                    borderSide: BorderSide(
-                      color: Colors.transparent,
-                      width: 1,
-                    ),
-                    borderRadius: 6,
-                  ),
-                  loading: _loadingButton,
-                )
+                    loading: _loadingButton,
+                  )
               ],
             ),
             Padding(
@@ -146,95 +149,61 @@ class _PostItemWidgetState extends State<PostItemWidget> {
                     .copyWith(color: FlutterFlowTheme.tertiaryColor),
               ),
             ),
-            Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(0, 0, 0, 5),
-              child: Builder(builder: (context) {
-                final documentImages =
-                    (widget.lost.images?.toList() ?? []).take(3).toList();
-                return Swiper(
-                  itemBuilder: (BuildContext context, int index) {
-                    return Image.network(
-                      documentImages[index],
-                      width: MediaQuery.of(context).size.width,
-                      height: 250,
-                      fit: BoxFit.cover,
-                      loadingBuilder: (BuildContext context, Widget child,
-                          ImageChunkEvent loadingProgress) {
-                        if (loadingProgress == null) {
-                          return child;
-                        }
-                        return Center(
-                          child: CircularProgressIndicator(
-                            value: loadingProgress.expectedTotalBytes != null
-                                ? loadingProgress.cumulativeBytesLoaded /
-                                    loadingProgress.expectedTotalBytes
-                                : null,
-                          ),
-                        );
-                      },
-                      errorBuilder: (ctx, o, s) {
-                        return Image.asset(
-                          'assets/images/emptyState@2x.png',
-                          width: double.infinity,
-                        );
-                      },
-                    );
-                  },
-                  itemCount: documentImages.length,
-                  pagination: new SwiperPagination(),
-                  control: new SwiperControl(),
-                );
-              }),
+            ConstrainedBox(
+              constraints: BoxConstraints(maxHeight: 250),
+              child: Padding(
+                padding: EdgeInsetsDirectional.fromSTEB(0, 0, 0, 5),
+                child: Builder(builder: (context) {
+                  final documentImages =
+                      (widget.lost.images?.toList() ?? []).take(3).toList();
+                  return Swiper(
+                    itemBuilder: (BuildContext context, int index) {
+                      return Hero(
+                        tag: "lostdoc${widget.docIndex}$index",
+                        child: Image.network(
+                          documentImages[index],
+                          width: MediaQuery.of(context).size.width,
+                          height: 250,
+                          fit: BoxFit.cover,
+                          loadingBuilder: (BuildContext context, Widget child,
+                              ImageChunkEvent loadingProgress) {
+                            if (loadingProgress == null) {
+                              return child;
+                            }
+                            return Center(
+                              child: CircularProgressIndicator(
+                                value: loadingProgress.expectedTotalBytes !=
+                                        null
+                                    ? loadingProgress.cumulativeBytesLoaded /
+                                        loadingProgress.expectedTotalBytes
+                                    : null,
+                              ),
+                            );
+                          },
+                          errorBuilder: (ctx, o, s) {
+                            return Image.asset(
+                              'assets/images/emptyState@2x.png',
+                              width: double.infinity,
+                            );
+                          },
+                        ),
+                      );
+                    },
+                    itemHeight: 250,
+                    itemCount: documentImages.length,
+                    pagination: new SwiperPagination(),
+                    control: new SwiperControl(),
+                    onTap: (index) {
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) => ImageViewWidget(
+                                imageUrl: documentImages[index],
+                                heroTag: 'lostdoc${widget.docIndex}$index',
+                              )));
+                    },
+                  );
+                }),
+              ),
             ),
-
-            // Padding(
-            //   padding: EdgeInsetsDirectional.fromSTEB(0, 0, 0, 5),
-            //   child: Builder(
-            //     builder: (context) {
-            //       final documentImages =
-            //           (widget.lost.images?.toList() ?? []).take(3).toList();
-            //       return SingleChildScrollView(
-            //         scrollDirection: Axis.horizontal,
-            //         child: Row(
-            //           mainAxisSize: MainAxisSize.max,
-            //           children: List.generate(documentImages.length,
-            //               (documentImagesIndex) {
-            //             final documentImagesItem =
-            //                 documentImages[documentImagesIndex];
-            //             return Image.network(
-            //               documentImagesItem,
-            //               width: MediaQuery.of(context).size.width,
-            //               height: 250,
-            //               fit: BoxFit.cover,
-            //               loadingBuilder: (BuildContext context, Widget child,
-            //                   ImageChunkEvent loadingProgress) {
-            //                 if (loadingProgress == null) {
-            //                   return child;
-            //                 }
-            //                 return Center(
-            //                   child: CircularProgressIndicator(
-            //                     value: loadingProgress.expectedTotalBytes !=
-            //                             null
-            //                         ? loadingProgress.cumulativeBytesLoaded /
-            //                             loadingProgress.expectedTotalBytes
-            //                         : null,
-            //                   ),
-            //                 );
-            //               },
-            //               errorBuilder: (ctx, o, s) {
-            //                 return Image.asset(
-            //                   'assets/images/emptyState@2x.png',
-            //                   width: double.infinity,
-            //                 );
-            //               },
-            //             );
-            //           }),
-            //         ),
-            //       );
-            //     },
-            //   ),
-            // ),
-
             Row(
               mainAxisSize: MainAxisSize.max,
               children: [

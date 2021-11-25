@@ -1,3 +1,5 @@
+import 'package:shared_preferences/shared_preferences.dart';
+
 import '../flutter_flow/flutter_flow_theme.dart';
 import '../flutter_flow/flutter_flow_util.dart';
 import '../flutter_flow/flutter_flow_widgets.dart';
@@ -7,7 +9,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 class LandingWidget extends StatefulWidget {
-  LandingWidget({Key key}) : super(key: key);
+  LandingWidget({Key key, this.prefs}) : super(key: key);
+  final SharedPreferences prefs;
 
   @override
   _LandingWidgetState createState() => _LandingWidgetState();
@@ -19,6 +22,12 @@ class _LandingWidgetState extends State<LandingWidget> {
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
+  initState() {
+    super.initState();
+    widget.prefs.setBool('isFirstRun', false);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       key: scaffoldKey,
@@ -27,15 +36,15 @@ class _LandingWidgetState extends State<LandingWidget> {
         mainAxisSize: MainAxisSize.max,
         children: [
           Padding(
-            padding: EdgeInsetsDirectional.fromSTEB(0, 60, 0, 0),
+            padding: EdgeInsetsDirectional.fromSTEB(0, 40, 0, 0),
             child: Row(
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Image.asset(
                   'assets/images/docfinder_logo.png',
-                  width: 200,
-                  height: 100,
+                  width: 125,
+                  height: 75,
                   fit: BoxFit.fitHeight,
                 )
               ],
@@ -48,7 +57,7 @@ class _LandingWidgetState extends State<LandingWidget> {
               style: FlutterFlowTheme.title1.override(
                 fontFamily: 'Poppins',
                 color: Colors.white,
-                fontSize: 28,
+                fontSize: 25,
               ),
             ),
           ),
@@ -85,7 +94,7 @@ class _LandingWidgetState extends State<LandingWidget> {
                                         'assets/images/onboarding_1.png',
                                         width:
                                             MediaQuery.of(context).size.width,
-                                        height: 250,
+                                        height: 150,
                                         fit: BoxFit.fitWidth,
                                       ),
                                     )
@@ -138,7 +147,7 @@ class _LandingWidgetState extends State<LandingWidget> {
                           ),
                           Container(
                             width: 100,
-                            height: 100,
+                            height: 70,
                             decoration: BoxDecoration(),
                             child: Column(
                               mainAxisSize: MainAxisSize.max,
@@ -154,7 +163,7 @@ class _LandingWidgetState extends State<LandingWidget> {
                                       child: Image.asset(
                                         'assets/images/onboarding_2.png',
                                         width: 300,
-                                        height: 300,
+                                        height: 150,
                                         fit: BoxFit.fitWidth,
                                       ),
                                     )
@@ -225,7 +234,7 @@ class _LandingWidgetState extends State<LandingWidget> {
                                       child: Image.asset(
                                         'assets/images/onboarding_3.png',
                                         width: 300,
-                                        height: 250,
+                                        height: 150,
                                         fit: BoxFit.fitWidth,
                                       ),
                                     )

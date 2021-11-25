@@ -1,4 +1,5 @@
 import 'package:cam_doc_finder/image_viewer/image_viewer_widget.dart';
+import 'package:cam_doc_finder/login_page/login_page_widget.dart';
 
 import '../auth/auth_util.dart';
 import '../backend/backend.dart';
@@ -75,7 +76,27 @@ class _MyProfilePageWidgetState extends State<MyProfilePageWidget> {
                 fontWeight: FontWeight.w500,
               ),
             ),
-            actions: [],
+            actions: [
+              InkWell(
+                onTap: () async {
+                  await signOut();
+                  await Navigator.pushAndRemoveUntil(
+                    context,
+                    PageTransition(
+                      type: PageTransitionType.fade,
+                      duration: Duration(milliseconds: 300),
+                      reverseDuration: Duration(milliseconds: 300),
+                      child: LoginPageWidget(),
+                    ),
+                    (r) => false,
+                  );
+                },
+                child: Padding(
+                  padding: EdgeInsets.all(6),
+                  child: Icon(Icons.logout, color: Colors.red, size: 30),
+                ),
+              )
+            ],
             centerTitle: true,
             elevation: 0,
           ),
@@ -96,6 +117,7 @@ class _MyProfilePageWidgetState extends State<MyProfilePageWidget> {
                                     imageUrl: uploadedFileUrl != ''
                                         ? uploadedFileUrl
                                         : myProfilePageUsersRecord.photoUrl,
+                                    heroTag: "imagetoview",
                                   )));
                         },
                         child: Container(
