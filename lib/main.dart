@@ -147,14 +147,14 @@ class _NavBarPageState extends State<NavBarPage> {
               tooltip: 'Messages',
             )
           ],
-          backgroundColor: FlutterFlowTheme.secondaryColor,
+          backgroundColor: FlutterFlowTheme.tertiaryColor,
           currentIndex: tabs.keys.toList().indexOf(_currentPage),
           selectedItemColor: Colors.white,
           unselectedItemColor: Color(0xB9FFFFFF),
           onTap: (i) => setState(() => _currentPage = tabs.keys.toList()[i]),
           showSelectedLabels: false,
           showUnselectedLabels: false,
-          type: BottomNavigationBarType.shifting),
+          type: BottomNavigationBarType.fixed),
     );
   }
 }
