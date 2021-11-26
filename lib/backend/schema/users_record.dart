@@ -52,6 +52,10 @@ abstract class UsersRecord implements Built<UsersRecord, UsersRecordBuilder> {
   static Stream<UsersRecord> getDocument(DocumentReference ref) => ref
       .snapshots()
       .map((s) => serializers.deserializeWith(serializer, serializedData(s)));
+  
+  // static Stream<UsersRecord> getDocuments(Iterable<DocumentReference> refs){
+  //   List
+  // }
 
   UsersRecord._();
   factory UsersRecord([void Function(UsersRecordBuilder) updates]) =

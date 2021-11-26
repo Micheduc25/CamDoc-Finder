@@ -347,7 +347,7 @@ class _CreatPostPageWidgetState extends State<CreatPostPageWidget> {
                           author: currentUserReference,
                           dateAdded: DateTime.now(),
                           views: 0),
-                      'images': FieldValue.arrayUnion(uploadedFilesUrls),
+                      'images': uploadedFilesUrls,
                     };
                     final lostDocumentsRecordReference =
                         LostDocumentsRecord.collection.doc();

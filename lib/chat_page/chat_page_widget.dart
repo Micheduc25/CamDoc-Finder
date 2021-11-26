@@ -10,12 +10,10 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class ChatPageWidget extends StatefulWidget {
-  ChatPageWidget({
-    Key key,
-    this.chat,
-  }) : super(key: key);
+  ChatPageWidget({Key key, this.chat, this.otherUser}) : super(key: key);
 
   final ChatsRecord chat;
+  final UsersRecord otherUser;
 
   @override
   _ChatPageWidgetState createState() => _ChatPageWidgetState();
@@ -24,13 +22,15 @@ class ChatPageWidget extends StatefulWidget {
 class _ChatPageWidgetState extends State<ChatPageWidget> {
   ChatMessagesRecord newMessage;
   TextEditingController messageFieldController;
-  String uploadedFileUrl = '';
+  String uploadedFileUrl;
+  ScrollController scrollController;
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
     super.initState();
     messageFieldController = TextEditingController();
+    scrollController = new ScrollController();
   }
 
   @override
@@ -41,7 +41,7 @@ class _ChatPageWidgetState extends State<ChatPageWidget> {
         backgroundColor: Colors.black,
         automaticallyImplyLeading: true,
         title: Text(
-          widget.chat.displayName,
+          widget.otherUser.displayName,
           style: FlutterFlowTheme.bodyText1.override(
             fontFamily: 'Lato',
             fontSize: 20,
@@ -61,9 +61,8 @@ class _ChatPageWidgetState extends State<ChatPageWidget> {
               child: StreamBuilder<List<ChatMessagesRecord>>(
                 stream: queryChatMessagesRecord(
                   queryBuilder: (chatMessagesRecord) => chatMessagesRecord
-                      .where('user', isEqualTo: widget.chat.userA)
-                      .where('user', isEqualTo: widget.chat.userB)
-                      .orderBy('timestamp', descending: true),
+                      .where('chat', isEqualTo: widget.chat.reference)
+                      .orderBy('timestamp', descending: false),
                 ),
                 builder: (context, snapshot) {
                   // Customize what your widget looks like when it's loading.
@@ -80,33 +79,34 @@ class _ChatPageWidgetState extends State<ChatPageWidget> {
                   }
                   List<ChatMessagesRecord> listViewChatMessagesRecordList =
                       snapshot.data;
+
                   return ListView.builder(
                     padding: EdgeInsets.zero,
                     scrollDirection: Axis.vertical,
+                    controller: scrollController,
                     itemCount: listViewChatMessagesRecordList.length,
                     itemBuilder: (context, listViewIndex) {
                       final listViewChatMessagesRecord =
                           listViewChatMessagesRecordList[listViewIndex];
+
                       return StreamBuilder<UsersRecord>(
                         stream: UsersRecord.getDocument(
                             listViewChatMessagesRecord.user),
                         builder: (context, snapshot) {
                           // Customize what your widget looks like when it's loading.
                           if (!snapshot.hasData) {
-                            return Center(
-                              child: SizedBox(
-                                width: 50,
-                                height: 50,
-                                child: CircularProgressIndicator(
-                                  color: FlutterFlowTheme.primaryColor,
-                                ),
-                              ),
-                            );
+                            return Container(height: 40);
                           }
                           final chatBubbleUsersRecord = snapshot.data;
-                          return ChatBubbleWidget(
-                            sender: chatBubbleUsersRecord,
-                            message: listViewChatMessagesRecord,
+                          return Align(
+                            alignment: listViewChatMessagesRecord.user ==
+                                    currentUserReference
+                                ? Alignment.centerRight
+                                : Alignment.centerLeft,
+                            child: ChatBubbleWidget(
+                              sender: chatBubbleUsersRecord,
+                              message: listViewChatMessagesRecord,
+                            ),
                           );
                         },
                       );
@@ -176,11 +176,12 @@ class _ChatPageWidgetState extends State<ChatPageWidget> {
                           if ((messageFieldController.text) != ('')) {
                             final chatMessagesCreateData =
                                 createChatMessagesRecordData(
-                              user: currentUserReference,
-                              chat: widget.chat.reference,
-                              text: messageFieldController.text,
-                              image: uploadedFileUrl,
-                            );
+                                    user: currentUserReference,
+                                    chat: widget.chat.reference,
+                                    text: messageFieldController.text,
+                                    image: uploadedFileUrl,
+                                    timestamp: DateTime.now());
+
                             final chatMessagesRecordReference =
                                 ChatMessagesRecord.collection.doc();
                             await chatMessagesRecordReference
@@ -188,9 +189,15 @@ class _ChatPageWidgetState extends State<ChatPageWidget> {
                             newMessage = ChatMessagesRecord.getDocumentFromData(
                                 chatMessagesCreateData,
                                 chatMessagesRecordReference);
-                          }
 
-                          setState(() {});
+                            setState(() {
+                              messageFieldController.clear();
+                              scrollController.animateTo(
+                                  scrollController.position.maxScrollExtent,
+                                  duration: Duration(milliseconds: 300),
+                                  curve: Curves.easeInOut);
+                            });
+                          }
                         },
                         child: Icon(
                           Icons.send,
