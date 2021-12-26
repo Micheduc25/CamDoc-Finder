@@ -1,3 +1,4 @@
+import 'package:cam_doc_finder/components/option_dialog.dart';
 import 'package:cam_doc_finder/image_viewer/image_viewer_widget.dart';
 import 'package:cam_doc_finder/login_page/login_page_widget.dart';
 
@@ -79,17 +80,28 @@ class _MyProfilePageWidgetState extends State<MyProfilePageWidget> {
             actions: [
               InkWell(
                 onTap: () async {
-                  await signOut();
-                  await Navigator.pushAndRemoveUntil(
-                    context,
-                    PageTransition(
-                      type: PageTransitionType.fade,
-                      duration: Duration(milliseconds: 300),
-                      reverseDuration: Duration(milliseconds: 300),
-                      child: LoginPageWidget(),
-                    ),
-                    (r) => false,
-                  );
+                  final shouldLogout = await showDialog<bool>(
+                      context: context,
+                      builder: (context) => OptionDialog(
+                            title: "Logout",
+                            content:
+                                "Do you really want to logout from your session?",
+                            onConfirm: () => Navigator.of(context).pop(true),
+                            onCancel: () => Navigator.of(context).pop(false),
+                          ));
+                  if (shouldLogout == true) {
+                    await signOut();
+                    await Navigator.pushAndRemoveUntil(
+                      context,
+                      PageTransition(
+                        type: PageTransitionType.fade,
+                        duration: Duration(milliseconds: 300),
+                        reverseDuration: Duration(milliseconds: 300),
+                        child: LoginPageWidget(),
+                      ),
+                      (r) => false,
+                    );
+                  }
                 },
                 child: Padding(
                   padding: EdgeInsets.all(6),

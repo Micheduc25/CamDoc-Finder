@@ -33,31 +33,13 @@ abstract class ChatsRecord implements Built<ChatsRecord, ChatsRecordBuilder> {
   BuiltList<DocumentReference> get lastMessageSeenBy;
 
   @nullable
-  String get email;
-
-  @nullable
-  @BuiltValueField(wireName: 'display_name')
-  String get displayName;
-
-  @nullable
-  @BuiltValueField(wireName: 'photo_url')
-  String get photoUrl;
-
-  @nullable
-  @BuiltValueField(wireName: 'created_time')
-  DateTime get createdTime;
-
-  @nullable
   @BuiltValueField(wireName: kDocumentReferenceField)
   DocumentReference get reference;
 
   static void _initializeBuilder(ChatsRecordBuilder builder) => builder
     ..users = ListBuilder()
     ..lastMessage = ''
-    ..lastMessageSeenBy = ListBuilder()
-    ..email = ''
-    ..displayName = ''
-    ..photoUrl = '';
+    ..lastMessageSeenBy = ListBuilder();
 
   static CollectionReference get collection =>
       FirebaseFirestore.instance.collection('chats');
@@ -81,10 +63,6 @@ Map<String, dynamic> createChatsRecordData({
   DocumentReference userB,
   String lastMessage,
   DateTime lastMessageTime,
-  String email,
-  String displayName,
-  String photoUrl,
-  DateTime createdTime,
 }) =>
     serializers.toFirestore(
         ChatsRecord.serializer,
@@ -94,8 +72,4 @@ Map<String, dynamic> createChatsRecordData({
           ..userB = userB
           ..lastMessage = lastMessage
           ..lastMessageTime = lastMessageTime
-          ..lastMessageSeenBy = null
-          ..email = email
-          ..displayName = displayName
-          ..photoUrl = photoUrl
-          ..createdTime = createdTime));
+          ..lastMessageSeenBy = null));

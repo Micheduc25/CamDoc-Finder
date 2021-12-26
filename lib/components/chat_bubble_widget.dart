@@ -1,4 +1,5 @@
 import 'package:cam_doc_finder/auth/auth_util.dart';
+import 'package:cam_doc_finder/image_viewer/image_viewer_widget.dart';
 
 import '../backend/backend.dart';
 import '../flutter_flow/flutter_flow_theme.dart';
@@ -7,14 +8,13 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class ChatBubbleWidget extends StatefulWidget {
-  ChatBubbleWidget({
-    Key key,
-    this.sender,
-    this.message,
-  }) : super(key: key);
+  ChatBubbleWidget(
+      {Key key, this.sender, this.message, this.messageSent = false})
+      : super(key: key);
 
   final UsersRecord sender;
   final ChatMessagesRecord message;
+  final bool messageSent;
 
   @override
   _ChatBubbleWidgetState createState() => _ChatBubbleWidgetState();
@@ -68,11 +68,23 @@ class _ChatBubbleWidgetState extends State<ChatBubbleWidget> {
                       decoration: BoxDecoration(
                         color: Color(0xFF09275F),
                       ),
-                      child: Image.network(
-                        widget.message.image,
-                        width: MediaQuery.of(context).size.width,
-                        height: 150,
-                        fit: BoxFit.contain,
+                      child: InkWell(
+                        onTap: () {
+                          Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) => ImageViewWidget(
+                                  heroTag: "bubbleimg",
+                                  imageUrl: widget.message.image,
+                                  initialCaption: widget.message.text)));
+                        },
+                        child: Hero(
+                          tag: "bubbleimg",
+                          child: Image.network(
+                            widget.message.image,
+                            width: MediaQuery.of(context).size.width,
+                            height: 150,
+                            fit: BoxFit.contain,
+                          ),
+                        ),
                       ),
                     ),
                   Divider(
@@ -85,16 +97,26 @@ class _ChatBubbleWidgetState extends State<ChatBubbleWidget> {
                       fontSize: 16,
                     ),
                   ),
-                  Padding(
-                    padding: EdgeInsetsDirectional.fromSTEB(0, 5, 0, 0),
-                    child: Text(
-                      dateTimeFormat('relative', widget.message.timestamp),
-                      textAlign: TextAlign.end,
-                      style: FlutterFlowTheme.bodyText1.override(
-                        fontFamily: 'Lato',
-                        fontSize: 12,
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Padding(
+                        padding: EdgeInsetsDirectional.fromSTEB(0, 5, 0, 0),
+                        child: Text(
+                          dateTimeFormat('relative', widget.message.timestamp),
+                          textAlign: TextAlign.end,
+                          style: FlutterFlowTheme.bodyText1.override(
+                            fontFamily: 'Lato',
+                            fontSize: 12,
+                          ),
+                        ),
                       ),
-                    ),
+                      SizedBox(width: 5),
+                      if (widget.sender.uid == currentUserUid)
+                        Icon(widget.messageSent ? Icons.check : Icons.history,
+                            size: 16, color: Colors.white)
+                    ],
                   )
                 ],
               ),

@@ -1,6 +1,10 @@
 import 'package:cam_doc_finder/auth/auth_util.dart';
 import 'package:cam_doc_finder/auth/firebase_user_provider.dart';
+import 'package:cam_doc_finder/components/option_dialog.dart';
+import 'package:cam_doc_finder/edit_post_page/edit_post_page.dart';
+import 'package:cam_doc_finder/flutter_flow/flutter_flow_icon_button.dart';
 import 'package:cam_doc_finder/image_viewer/image_viewer_widget.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../backend/backend.dart';
 import '../contact_page/contact_page_widget.dart';
@@ -88,46 +92,93 @@ class _PostItemWidgetState extends State<PostItemWidget> {
                     )
                   ],
                 ),
-                if (currentUserUid != widget.author.uid)
-                  FFButtonWidget(
-                    onPressed: () async {
-                      setState(() => _loadingButton = true);
-                      try {
-                        await Navigator.push(
-                          context,
-                          PageTransition(
-                            type: PageTransitionType.fade,
-                            duration: Duration(milliseconds: 300),
-                            reverseDuration: Duration(milliseconds: 300),
-                            child: ContactPageWidget(
-                              lost: widget.lost,
-                              author: widget.author,
+                Row(mainAxisSize: MainAxisSize.min, children: [
+                  if (currentUserUid != widget.author.uid)
+                    FFButtonWidget(
+                      onPressed: () async {
+                        setState(() => _loadingButton = true);
+                        try {
+                          await Navigator.push(
+                            context,
+                            PageTransition(
+                              type: PageTransitionType.fade,
+                              duration: Duration(milliseconds: 300),
+                              reverseDuration: Duration(milliseconds: 300),
+                              child: ContactPageWidget(
+                                lost: widget.lost,
+                                author: widget.author,
+                              ),
                             ),
-                          ),
-                        );
-                      } finally {
-                        setState(() => _loadingButton = false);
-                      }
-                    },
-                    text: 'Contact',
-                    options: FFButtonOptions(
-                      width: 100,
-                      height: 35,
-                      color: FlutterFlowTheme.primaryColor,
-                      textStyle: FlutterFlowTheme.subtitle2.override(
-                        fontFamily: 'Quicksand',
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                          );
+                        } finally {
+                          setState(() => _loadingButton = false);
+                        }
+                      },
+                      text: 'Contact',
+                      options: FFButtonOptions(
+                        width: 100,
+                        height: 35,
+                        color: FlutterFlowTheme.primaryColor,
+                        textStyle: FlutterFlowTheme.subtitle2.override(
+                          fontFamily: 'Quicksand',
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        borderSide: BorderSide(
+                          color: Colors.transparent,
+                          width: 1,
+                        ),
+                        borderRadius: 6,
                       ),
-                      borderSide: BorderSide(
-                        color: Colors.transparent,
-                        width: 1,
-                      ),
-                      borderRadius: 6,
+                      loading: _loadingButton,
                     ),
-                    loading: _loadingButton,
-                  )
+                  if (widget.author.uid == currentUserUid)
+                    FlutterFlowIconButton(
+                      borderRadius: 5,
+                      icon: Icon(FontAwesomeIcons.edit,
+                          color: FlutterFlowTheme.primaryColor),
+                      onPressed: () {
+                        Navigator.of(context).push(PageTransition(
+                            alignment: Alignment.centerLeft,
+                            type: PageTransitionType.scale,
+                            child:
+                                EditPostPageWidget(postToEdit: widget.lost)));
+                      },
+                    ),
+                  if (widget.author.uid == currentUserUid)
+                    FlutterFlowIconButton(
+                      borderRadius: 5,
+                      icon: Icon(FontAwesomeIcons.solidTrashAlt,
+                          color: Colors.red),
+                      onPressed: () async {
+                        final bool shouldDeletePost = await showDialog<bool>(
+                            context: context,
+                            builder: (context) => OptionDialog(
+                                  title: "Delete Post",
+                                  content:
+                                      "Do you really want to delete this post?",
+                                  onConfirm: () =>
+                                      Navigator.of(context).pop(true),
+                                  onCancel: () =>
+                                      Navigator.of(context).pop(false),
+                                ));
+
+                        if (shouldDeletePost == true) {
+                          final postRef = widget.lost.reference;
+
+                          try {
+                            await postRef.delete();
+                            showSnackbar(context, "Post successfully deleted");
+                          } on Exception catch (e) {
+                            print(e);
+                            showSnackbar(context,
+                                "An error occured while deleting post");
+                          }
+                        }
+                      },
+                    )
+                ])
               ],
             ),
             Padding(
@@ -194,11 +245,12 @@ class _PostItemWidgetState extends State<PostItemWidget> {
                     pagination: new SwiperPagination(),
                     control: new SwiperControl(),
                     onTap: (index) {
-                      Navigator.of(context).push(MaterialPageRoute(
-                          builder: (context) => ImageViewWidget(
-                                imageUrl: documentImages[index],
-                                heroTag: 'lostdoc${widget.docIndex}$index',
-                              )));
+                      Navigator.of(context).push(PageTransition(
+                          child: ImageViewWidget(
+                            imageUrl: documentImages[index],
+                            heroTag: 'lostdoc${widget.docIndex}$index',
+                          ),
+                          type: PageTransitionType.fade));
                     },
                   );
                 }),

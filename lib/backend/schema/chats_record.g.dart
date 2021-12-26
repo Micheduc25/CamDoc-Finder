@@ -67,34 +67,6 @@ class _$ChatsRecordSerializer implements StructuredSerializer<ChatsRecord> {
               const FullType(DocumentReference, const [const FullType(Object)])
             ])));
     }
-    value = object.email;
-    if (value != null) {
-      result
-        ..add('email')
-        ..add(serializers.serialize(value,
-            specifiedType: const FullType(String)));
-    }
-    value = object.displayName;
-    if (value != null) {
-      result
-        ..add('display_name')
-        ..add(serializers.serialize(value,
-            specifiedType: const FullType(String)));
-    }
-    value = object.photoUrl;
-    if (value != null) {
-      result
-        ..add('photo_url')
-        ..add(serializers.serialize(value,
-            specifiedType: const FullType(String)));
-    }
-    value = object.createdTime;
-    if (value != null) {
-      result
-        ..add('created_time')
-        ..add(serializers.serialize(value,
-            specifiedType: const FullType(DateTime)));
-    }
     value = object.reference;
     if (value != null) {
       result
@@ -151,22 +123,6 @@ class _$ChatsRecordSerializer implements StructuredSerializer<ChatsRecord> {
                     DocumentReference, const [const FullType(Object)])
               ])) as BuiltList<Object>);
           break;
-        case 'email':
-          result.email = serializers.deserialize(value,
-              specifiedType: const FullType(String)) as String;
-          break;
-        case 'display_name':
-          result.displayName = serializers.deserialize(value,
-              specifiedType: const FullType(String)) as String;
-          break;
-        case 'photo_url':
-          result.photoUrl = serializers.deserialize(value,
-              specifiedType: const FullType(String)) as String;
-          break;
-        case 'created_time':
-          result.createdTime = serializers.deserialize(value,
-              specifiedType: const FullType(DateTime)) as DateTime;
-          break;
         case 'Document__Reference__Field':
           result.reference = serializers.deserialize(value,
                   specifiedType: const FullType(
@@ -194,14 +150,6 @@ class _$ChatsRecord extends ChatsRecord {
   @override
   final BuiltList<DocumentReference<Object>> lastMessageSeenBy;
   @override
-  final String email;
-  @override
-  final String displayName;
-  @override
-  final String photoUrl;
-  @override
-  final DateTime createdTime;
-  @override
   final DocumentReference<Object> reference;
 
   factory _$ChatsRecord([void Function(ChatsRecordBuilder) updates]) =>
@@ -214,10 +162,6 @@ class _$ChatsRecord extends ChatsRecord {
       this.lastMessage,
       this.lastMessageTime,
       this.lastMessageSeenBy,
-      this.email,
-      this.displayName,
-      this.photoUrl,
-      this.createdTime,
       this.reference})
       : super._();
 
@@ -238,10 +182,6 @@ class _$ChatsRecord extends ChatsRecord {
         lastMessage == other.lastMessage &&
         lastMessageTime == other.lastMessageTime &&
         lastMessageSeenBy == other.lastMessageSeenBy &&
-        email == other.email &&
-        displayName == other.displayName &&
-        photoUrl == other.photoUrl &&
-        createdTime == other.createdTime &&
         reference == other.reference;
   }
 
@@ -251,21 +191,11 @@ class _$ChatsRecord extends ChatsRecord {
         $jc(
             $jc(
                 $jc(
-                    $jc(
-                        $jc(
-                            $jc(
-                                $jc(
-                                    $jc(
-                                        $jc($jc(0, users.hashCode),
-                                            userA.hashCode),
-                                        userB.hashCode),
-                                    lastMessage.hashCode),
-                                lastMessageTime.hashCode),
-                            lastMessageSeenBy.hashCode),
-                        email.hashCode),
-                    displayName.hashCode),
-                photoUrl.hashCode),
-            createdTime.hashCode),
+                    $jc($jc($jc(0, users.hashCode), userA.hashCode),
+                        userB.hashCode),
+                    lastMessage.hashCode),
+                lastMessageTime.hashCode),
+            lastMessageSeenBy.hashCode),
         reference.hashCode));
   }
 
@@ -278,10 +208,6 @@ class _$ChatsRecord extends ChatsRecord {
           ..add('lastMessage', lastMessage)
           ..add('lastMessageTime', lastMessageTime)
           ..add('lastMessageSeenBy', lastMessageSeenBy)
-          ..add('email', email)
-          ..add('displayName', displayName)
-          ..add('photoUrl', photoUrl)
-          ..add('createdTime', createdTime)
           ..add('reference', reference))
         .toString();
   }
@@ -321,22 +247,6 @@ class ChatsRecordBuilder implements Builder<ChatsRecord, ChatsRecordBuilder> {
           ListBuilder<DocumentReference<Object>> lastMessageSeenBy) =>
       _$this._lastMessageSeenBy = lastMessageSeenBy;
 
-  String _email;
-  String get email => _$this._email;
-  set email(String email) => _$this._email = email;
-
-  String _displayName;
-  String get displayName => _$this._displayName;
-  set displayName(String displayName) => _$this._displayName = displayName;
-
-  String _photoUrl;
-  String get photoUrl => _$this._photoUrl;
-  set photoUrl(String photoUrl) => _$this._photoUrl = photoUrl;
-
-  DateTime _createdTime;
-  DateTime get createdTime => _$this._createdTime;
-  set createdTime(DateTime createdTime) => _$this._createdTime = createdTime;
-
   DocumentReference<Object> _reference;
   DocumentReference<Object> get reference => _$this._reference;
   set reference(DocumentReference<Object> reference) =>
@@ -355,10 +265,6 @@ class ChatsRecordBuilder implements Builder<ChatsRecord, ChatsRecordBuilder> {
       _lastMessage = $v.lastMessage;
       _lastMessageTime = $v.lastMessageTime;
       _lastMessageSeenBy = $v.lastMessageSeenBy?.toBuilder();
-      _email = $v.email;
-      _displayName = $v.displayName;
-      _photoUrl = $v.photoUrl;
-      _createdTime = $v.createdTime;
       _reference = $v.reference;
       _$v = null;
     }
@@ -388,10 +294,6 @@ class ChatsRecordBuilder implements Builder<ChatsRecord, ChatsRecordBuilder> {
               lastMessage: lastMessage,
               lastMessageTime: lastMessageTime,
               lastMessageSeenBy: _lastMessageSeenBy?.build(),
-              email: email,
-              displayName: displayName,
-              photoUrl: photoUrl,
-              createdTime: createdTime,
               reference: reference);
     } catch (_) {
       String _$failedField;

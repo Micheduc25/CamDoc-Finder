@@ -1,3 +1,5 @@
+import 'package:cam_doc_finder/backend/search/search.dart';
+import 'package:easy_debounce/easy_debounce.dart';
 import 'package:flutter_search_bar/flutter_search_bar.dart';
 
 import '../auth/auth_util.dart';
@@ -23,6 +25,7 @@ class _DocumentsPageWidgetState extends State<DocumentsPageWidget> {
   List<LostDocumentsRecord> filteredLostDocs;
   List<LostDocumentsRecord> documentsPageLostDocumentsRecordList;
   bool isSearching = false;
+  String searchString = "";
 
   AppBar buildAppBar(BuildContext context) {
     return new AppBar(
@@ -78,19 +81,20 @@ class _DocumentsPageWidgetState extends State<DocumentsPageWidget> {
   }
 
   void searchDocs(String value) {
-    if (isSearching == false) isSearching = true;
     // print(isSearching);
-
-    if (documentsPageLostDocumentsRecordList != null)
+    if (isSearching == false)
       setState(() {
-        if (value.isNotEmpty)
-          filteredLostDocs = filteredLostDocs.where((doc) {
-            return (doc.title.toLowerCase().contains(value.toLowerCase())) ||
-                (doc.description.toLowerCase().contains(value.toLowerCase()));
-          }).toList();
-        else
-          filteredLostDocs = documentsPageLostDocumentsRecordList;
+        isSearching = true;
       });
+
+    if (documentsPageLostDocumentsRecordList != null) {
+      EasyDebounce.debounce('search-chat', Duration(milliseconds: 400),
+          () async {
+        setState(() {
+          searchString = value;
+        });
+      });
+    }
   }
 
   _DocumentsPageWidgetState() {
@@ -139,11 +143,33 @@ class _DocumentsPageWidgetState extends State<DocumentsPageWidget> {
           }
           documentsPageLostDocumentsRecordList = snapshot.data;
           if (filteredLostDocs == null) filteredLostDocs = snapshot.data;
-          print(documentsPageLostDocumentsRecordList.length);
+
+          filteredLostDocs = SearchItems.documentsSearch(
+              query: searchString,
+              collection: documentsPageLostDocumentsRecordList);
           return Scaffold(
             key: scaffoldKey,
             backgroundColor: FlutterFlowTheme.secondaryColor,
             appBar: searchBar.build(context),
+            floatingActionButton: FloatingActionButton(
+                backgroundColor: FlutterFlowTheme.primaryColor,
+                child: Icon(
+                  Icons.add,
+                ),
+                tooltip: "new post",
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    PageTransition(
+                      type: PageTransitionType.scale,
+
+                      // duration: Duration(milliseconds: 300),
+                      alignment: Alignment.bottomLeft,
+                      reverseDuration: Duration(milliseconds: 300),
+                      child: CreatPostPageWidget(),
+                    ),
+                  );
+                }),
             body: SafeArea(
               child: Padding(
                 padding: EdgeInsetsDirectional.fromSTEB(1, 0, 1, 0),
@@ -152,117 +178,6 @@ class _DocumentsPageWidgetState extends State<DocumentsPageWidget> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // Padding(
-                    //   padding: EdgeInsetsDirectional.fromSTEB(0, 0, 0, 20),
-                    //   child: Container(
-                    //     width: double.infinity,
-                    //     height: 60,
-                    //     decoration: BoxDecoration(
-                    //       color: FlutterFlowTheme.tertiaryColor,
-                    //     ),
-                    //     child:
-                    //     Row(
-                    //       mainAxisSize: MainAxisSize.max,
-                    //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    //       children: [
-                    //         Padding(
-                    //           padding:
-                    //               EdgeInsetsDirectional.fromSTEB(4, 4, 0, 0),
-                    //           child: InkWell(
-                    //             onTap: () async {
-                    //               await signOut();
-                    //               await Navigator.pushAndRemoveUntil(
-                    //                 context,
-                    //                 PageTransition(
-                    //                   type: PageTransitionType.fade,
-                    //                   duration: Duration(milliseconds: 300),
-                    //                   reverseDuration:
-                    //                       Duration(milliseconds: 300),
-                    //                   child: LoginPageWidget(),
-                    //                 ),
-                    //                 (r) => false,
-                    //               );
-                    //             },
-                    //             child: Text(
-                    //               'CamDoc Finder',
-                    //               style: FlutterFlowTheme.bodyText1.override(
-                    //                 fontFamily: 'Condiment',
-                    //                 color: FlutterFlowTheme.secondaryColor,
-                    //                 fontSize: 27,
-                    //                 fontWeight: FontWeight.w900,
-                    //               ),
-                    //             ),
-                    //           ),
-                    //         ),
-                    //         SingleChildScrollView(
-                    //           child: Row(
-                    //             mainAxisSize: MainAxisSize.max,
-                    //             children: [
-                    //               Padding(
-                    //                 padding: EdgeInsetsDirectional.fromSTEB(
-                    //                     0, 0, 20, 0),
-                    //                 child: InkWell(
-                    //                   onTap: () async {
-                    //                     await Navigator.push(
-                    //                       context,
-                    //                       PageTransition(
-                    //                         type: PageTransitionType.fade,
-                    //                         duration:
-                    //                             Duration(milliseconds: 300),
-                    //                         reverseDuration:
-                    //                             Duration(milliseconds: 300),
-                    //                         child: CreatPostPageWidget(),
-                    //                       ),
-                    //                     );
-                    //                   },
-                    //                   child: Icon(
-                    //                     Icons.add_box_outlined,
-                    //                     color: FlutterFlowTheme.secondaryColor,
-                    //                     size: 30,
-                    //                   ),
-                    //                 ),
-                    //               ),
-                    //               Padding(
-                    //                 padding: EdgeInsetsDirectional.fromSTEB(
-                    //                     0, 4, 20, 0),
-                    //                 child: Container(
-                    //                   width: 36,
-                    //                   height: 36,
-                    //                   child: Padding(
-                    //                     padding: EdgeInsetsDirectional.fromSTEB(
-                    //                         0, 0, 2, 0),
-                    //                     child: Icon(
-                    //                       Icons.search,
-                    //                       color:
-                    //                           FlutterFlowTheme.secondaryColor,
-                    //                       size: 30,
-                    //                     ),
-                    //                   ),
-                    //                 ),
-                    //               ),
-                    //               Padding(
-                    //                 padding: EdgeInsetsDirectional.fromSTEB(
-                    //                     0, 4, 20, 0),
-                    //                 child: InkWell(
-                    //                   onTap: () {
-                    //                     //switch to dark mode here
-                    //                     ThemeData.dark();
-                    //                   },
-                    //                   child: Icon(
-                    //                     Icons.settings_outlined,
-                    //                     color: FlutterFlowTheme.secondaryColor,
-                    //                     size: 30,
-                    //                   ),
-                    //                 ),
-                    //               )
-                    //             ],
-                    //           ),
-                    //         )
-                    //       ],
-                    //     ),
-                    //   ),
-                    // ),
-
                     Expanded(
                       child: Builder(
                         builder: (context) {
@@ -283,7 +198,7 @@ class _DocumentsPageWidgetState extends State<DocumentsPageWidget> {
                                   padding: EdgeInsets.zero,
                                   shrinkWrap: true,
                                   scrollDirection: Axis.vertical,
-                                  physics: BouncingScrollPhysics(),
+                                  // physics: BouncingScrollPhysics(),
                                   itemCount: filteredLostDocs.length,
                                   itemBuilder:
                                       (context, lostDocumentsListIndex) {

@@ -1,4 +1,5 @@
 import 'package:cam_doc_finder/landing/landing_widget.dart';
+import 'package:cam_doc_finder/m_a_i_n_chat/m_a_i_n_chat_widget.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -63,7 +64,9 @@ class _MyAppState extends State<MyApp> {
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: const [Locale('en', ''), Locale('fr', '')],
-      theme: ThemeData(primarySwatch: Colors.blue),
+      theme: ThemeData(
+          primarySwatch: Colors.blue,
+          canvasColor: FlutterFlowTheme.secondaryColor),
       debugShowCheckedModeBanner: false,
       home: initialUser == null || prefs == null
           ? Container(
@@ -108,7 +111,7 @@ class _NavBarPageState extends State<NavBarPage> {
     final tabs = {
       'DocumentsPage': DocumentsPageWidget(),
       'MyProfilePage': MyProfilePageWidget(),
-      'Messages': MessagesWidget(),
+      'Messages': MAINChatWidget(),
     };
     return Scaffold(
       body: tabs[_currentPage],

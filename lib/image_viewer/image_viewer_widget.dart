@@ -3,11 +3,20 @@ import 'package:flutter/material.dart';
 
 class ImageViewWidget extends StatelessWidget {
   const ImageViewWidget(
-      {key, this.imageUrl, this.isNetworkImage = true, @required this.heroTag})
+      {key,
+      @required this.imageUrl,
+      this.isNetworkImage = true,
+      @required this.heroTag,
+      this.initialCaption = "",
+      this.showTextInput = false,
+      this.textController})
       : super(key: key);
   final String imageUrl;
   final bool isNetworkImage;
   final String heroTag;
+  final String initialCaption;
+  final bool showTextInput;
+  final TextEditingController textController;
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +68,63 @@ class ImageViewWidget extends StatelessWidget {
                             ]),
                         child: Icon(Icons.arrow_back,
                             color: FlutterFlowTheme.tertiaryColor, size: 30),
-                      )))
+                      ))),
+              if (showTextInput)
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  child: Container(
+                    color: Colors.black.withOpacity(0.7),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 5, vertical: 5),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.max,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Expanded(
+                            child: TextField(
+                                controller: textController,
+                                style: TextStyle(color: Colors.white),
+                                decoration: InputDecoration(
+                                    border: UnderlineInputBorder(
+                                        borderSide:
+                                            BorderSide(color: Colors.white)),
+                                    focusedBorder: UnderlineInputBorder(
+                                        borderSide: BorderSide(
+                                            color: Colors.white, width: 2)))),
+                          ),
+                          SizedBox(width: 10),
+                          InkWell(
+                              onTap: () {
+                                Navigator.of(context).pop(<String, dynamic>{
+                                  'text': textController.text,
+                                  'send': true
+                                });
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Icon(Icons.send,
+                                    size: 30, color: Colors.white),
+                              ))
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              if (!showTextInput && initialCaption != "")
+                Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    child: Container(
+                        color: Colors.black.withOpacity(0.6),
+                        alignment: Alignment.center,
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                        child: Text(initialCaption,
+                            style: TextStyle(color: Colors.white))))
             ],
           ),
         ),

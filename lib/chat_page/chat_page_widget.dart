@@ -1,3 +1,5 @@
+import 'package:cam_doc_finder/image_viewer/image_viewer_widget.dart';
+
 import '../auth/auth_util.dart';
 import '../backend/backend.dart';
 import '../backend/firebase_storage/storage.dart';
@@ -25,6 +27,8 @@ class _ChatPageWidgetState extends State<ChatPageWidget> {
   String uploadedFileUrl;
   ScrollController scrollController;
   final scaffoldKey = GlobalKey<ScaffoldState>();
+  bool currentMessageSent = false;
+  bool messageSending = false;
 
   @override
   void initState() {
@@ -106,6 +110,7 @@ class _ChatPageWidgetState extends State<ChatPageWidget> {
                             child: ChatBubbleWidget(
                               sender: chatBubbleUsersRecord,
                               message: listViewChatMessagesRecord,
+                              messageSent: true,
                             ),
                           );
                         },
@@ -171,62 +176,75 @@ class _ChatPageWidgetState extends State<ChatPageWidget> {
                           ),
                         ),
                       ),
+                      !messageSending
+                          ? InkWell(
+                              onTap: () async {
+                                await _sendMessage(context);
+                              },
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 5.0),
+                                child: Icon(
+                                  Icons.send,
+                                  color: FlutterFlowTheme.primaryColor,
+                                  size: 30,
+                                ),
+                              ))
+                          : Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 5.0),
+                              child: Center(
+                                child: SizedBox(
+                                  width: 30,
+                                  height: 30,
+                                  child: CircularProgressIndicator(
+                                      color: Colors.white),
+                                ),
+                              ),
+                            ),
                       InkWell(
                         onTap: () async {
-                          if ((messageFieldController.text) != ('')) {
-                            final chatMessagesCreateData =
-                                createChatMessagesRecordData(
-                                    user: currentUserReference,
-                                    chat: widget.chat.reference,
-                                    text: messageFieldController.text,
-                                    image: uploadedFileUrl,
-                                    timestamp: DateTime.now());
+                          if (!messageSending) {
+                            final selectedMedia =
+                                await selectMediaWithSourceBottomSheet(
+                              context: context,
+                              allowPhoto: true,
+                            );
+                            if (selectedMedia != null &&
+                                validateFileFormat(
+                                    selectedMedia.storagePath, context)) {
+                              setState(() {
+                                messageSending = true;
+                              });
+                              showUploadMessage(context, 'Uploading file...',
+                                  showLoading: true);
+                              final downloadUrl = await uploadData(
+                                  selectedMedia.storagePath,
+                                  selectedMedia.bytes);
+                              ScaffoldMessenger.of(context)
+                                  .hideCurrentSnackBar();
+                              if (downloadUrl != null) {
+                                setState(() => uploadedFileUrl = downloadUrl);
+                                showUploadMessage(context, 'Success!');
+                              } else {
+                                showUploadMessage(
+                                    context, 'Failed to upload media');
+                                return;
+                              }
 
-                            final chatMessagesRecordReference =
-                                ChatMessagesRecord.collection.doc();
-                            await chatMessagesRecordReference
-                                .set(chatMessagesCreateData);
-                            newMessage = ChatMessagesRecord.getDocumentFromData(
-                                chatMessagesCreateData,
-                                chatMessagesRecordReference);
+                              final Map<String, dynamic> message =
+                                  await Navigator.of(context)
+                                      .push(PageTransition(
+                                          type: PageTransitionType.fade,
+                                          child: ImageViewWidget(
+                                            heroTag: "chatimg",
+                                            imageUrl: uploadedFileUrl,
+                                            showTextInput: true,
+                                            textController:
+                                                messageFieldController,
+                                          )));
 
-                            setState(() {
-                              messageFieldController.clear();
-                              scrollController.animateTo(
-                                  scrollController.position.maxScrollExtent,
-                                  duration: Duration(milliseconds: 300),
-                                  curve: Curves.easeInOut);
-                            });
-                          }
-                        },
-                        child: Icon(
-                          Icons.send,
-                          color: FlutterFlowTheme.primaryColor,
-                          size: 30,
-                        ),
-                      ),
-                      InkWell(
-                        onTap: () async {
-                          final selectedMedia =
-                              await selectMediaWithSourceBottomSheet(
-                            context: context,
-                            allowPhoto: true,
-                          );
-                          if (selectedMedia != null &&
-                              validateFileFormat(
-                                  selectedMedia.storagePath, context)) {
-                            showUploadMessage(context, 'Uploading file...',
-                                showLoading: true);
-                            final downloadUrl = await uploadData(
-                                selectedMedia.storagePath, selectedMedia.bytes);
-                            ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                            if (downloadUrl != null) {
-                              setState(() => uploadedFileUrl = downloadUrl);
-                              showUploadMessage(context, 'Success!');
-                            } else {
-                              showUploadMessage(
-                                  context, 'Failed to upload media');
-                              return;
+                              if (message != null) await _sendMessage(context);
                             }
                           }
                         },
@@ -245,5 +263,46 @@ class _ChatPageWidgetState extends State<ChatPageWidget> {
         ),
       ),
     );
+  }
+
+  Future<void> _sendMessage(BuildContext context) async {
+    if ((messageFieldController.text) != ('') && messageSending == false) {
+      setState(() {
+        messageSending = true;
+      });
+      final now = DateTime.now();
+      final message = messageFieldController.text;
+      final chatMessagesCreateData = createChatMessagesRecordData(
+          user: currentUserReference,
+          chat: widget.chat.reference,
+          text: message,
+          image: uploadedFileUrl,
+          timestamp: now);
+
+      final chatMessagesRecordReference = ChatMessagesRecord.collection.doc();
+
+      try {
+        await chatMessagesRecordReference.set(chatMessagesCreateData);
+        newMessage = ChatMessagesRecord.getDocumentFromData(
+            chatMessagesCreateData, chatMessagesRecordReference);
+        messageFieldController.clear();
+
+        final chatRef = ChatsRecord.collection.doc(widget.chat.reference.id);
+
+        await chatRef.update({
+          "last_message": newMessage.text,
+          "last_message_time": newMessage.timestamp
+        });
+      } catch (ex) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text("An error occured while sending the message")));
+      } finally {
+        setState(() {
+          messageSending = false;
+          scrollController.animateTo(scrollController.position.maxScrollExtent,
+              duration: Duration(milliseconds: 300), curve: Curves.easeInOut);
+        });
+      }
+    }
   }
 }
